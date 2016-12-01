@@ -23,17 +23,17 @@ PATH = HOME / DEFAULT_NAME
 class SpaceParts(object):
 
     def __init__(self, partname):
-        self.part = partname
-        self.home = pathlib.Path(home)
+        self.part = str(partname)
+        self.home = pathlib.Path(HOME)
         self.spacedir = pathlib.Path(PATH)
-        self.arcive_path = self. home /
-        self.active_path =
-
+        self.arcive_path = self.home / self.part
+        self.active_path = self.spacedir / self.part
 
 class SpaceDot(SpaceParts):
+    pass
 
 class EmacsConfig(SpaceParts):
-
+    pass
 
 @click.group()
 def main():
@@ -62,11 +62,13 @@ def archive():
     print('done!')
 
 
+# TODO: get it working
 @click.command()
 def show():
     print('show')
 
 
+# TODO: get it working
 @click.command()
 def load():
     print('load')
