@@ -44,29 +44,48 @@ def archived_emacsconfig(sb_id):
     return backup_dir(sb_id) / emacs_dir
 
 
-##############
+def iter_possible_backup_dirs():
+    for backup_dir in PATH.glob('*'):
+        if backup_dir.is_dir():
+            yield backup_dir
+
+def backup_id_contains_spacedot(backup_id):
+    bu_sm = archived_spacemacs(backup_id)
+    if bu_sm.is_file():
+        return True
+    return False
+
+def backup_id_contains_emacsconfig(backup_id):
+    bu_em = archived_emacsconfig(backup_id)
+    if bu_em.is_dir():
+        return True
+    return False
+
+def backup_id_legit(backup_id):
+    # must contain spacemacs file + emacs config
+    if not backup_id_contains_spacedot(backup_id):
+        return False
+    if not backup_id_contains_emacsconfig(backup_id):
+        return False
+
+    # must be formatted as timestamp
+    try:
+        int(backup_id)
+    except ValueError:
+        return False
+
+    return True
+
+def iter_backup_ids():
+    for backup_dir in iter_possible_backup_dirs():
+        backup_id = backup_dir.name
+        if backup_id_legit(backup_id):
+            yield backup_id
 
 # TODO: break into small parts
 def show():
-    for backup_dir in PATH.glob('*'):
-        backup_id = backup_dir.name
-        bu_sm = archived_spacemacs(backup_id)
-        bu_em = archived_emacsconfig(backup_id)
-        # backup must be a directory
-        if not backup_dir.is_dir():
-            continue
-        # backup must contain spacemacs file
-        if not bu_sm.is_file():
-            continue
-        # backup must contain emacs.d dir
-        if not bu_em.is_dir():
-            continue
-        # backup_id must be formated as timestamp
-        try:
-            time = int(backup_id)
-        except ValueError:
-            continue
-
+    for backup_id in iter_backup_ids():
+        time = int(backup_id)
         date = interpret_id(time)
         print(backup_id, '--', date)
 
