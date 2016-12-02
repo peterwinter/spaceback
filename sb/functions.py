@@ -1,6 +1,9 @@
 import os
 import pathlib
 import datetime
+from .files import move
+from .files import copy_file
+from .files import copy_dir
 
 # Todo: make config file for globals
 DEFAULT_NAME = pathlib.Path('.spaceback')
@@ -85,8 +88,7 @@ def iter_backup_ids():
 # TODO: break into small parts
 def show():
     for backup_id in iter_backup_ids():
-        time = int(backup_id)
-        date = interpret_id(time)
+        date = interpret_id(backup_id)
         print(backup_id, '--', date)
 
 def current_id():
@@ -94,11 +96,10 @@ def current_id():
     current_timestamp = round(today.timestamp())
     return current_timestamp
 
-
 def interpret_id(ts):
+    ts = int(ts)
     date = datetime.datetime.fromtimestamp(ts)
     return '{d}'.format(d=date)
-
 
 def active_exists():
     spacemacs_dot = active_spacemacs()
@@ -110,3 +111,49 @@ def active_exists():
         print('.emacs.d does not exist')
         return False
     return True
+
+
+def deactivate_item(path, tail='.bak', real=False):
+    new_path = pathlib.Path(str(path) + tail)
+    if new_path.exists():
+        try:
+            num = int(new_path.name[-1])
+            num += 1
+        except:
+            num = 1
+        new_path = pathlib.Path(str(new_path) + num)
+    print(path, '--->', new_path)
+    if real:
+        move(path, new_path)
+
+
+def deactivate_current(real=False):
+    print('--moving active setup--')
+    deactivate_item(path=active_spacemacs(), real=real)
+    deactivate_item(path=active_emacsconfig(), real=real)
+
+
+def activate_backup(backup_id, real=False):
+    print('--activating backup--')
+    from_here = archived_spacemacs(backup_id)
+    to_here = active_spacemacs()
+    print(to_here, '<--', from_here)
+    if real:
+        copy_file(from_here, to_here)
+
+    from_here = archived_emacsconfig(backup_id)
+    to_here = active_emacsconfig()
+    print(to_here, '<--', from_here)
+    if real:
+        copy_dir(from_here, to_here)
+
+
+def run_load(backup_id, real=False):
+    if backup_id_legit(backup_id):
+        print('backup_id validated')
+    else:
+        print('backup_id not valid')
+        return
+
+    deactivate_current(real=real)
+    activate_backup(backup_id, real=real)

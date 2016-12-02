@@ -53,3 +53,6 @@ def copy_file(input_path, output_path):
 def copy_dir(input_path, output_path):
     ensure_dir_exists(path=output_path.parent)
     copy_tree(src=str(input_path), dst=str(output_path))
+
+def move(src, dst):
+    shutil.move(src, dst)

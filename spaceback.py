@@ -38,16 +38,18 @@ def archive():
 
 # TODO: get it working
 @click.command()
-def show():
+# @click.argument('backup_id', optional=True)
+def show(): #backup_id):
     print('backups:')
     sb.show()
 
 
 # TODO: get it working
 @click.command()
-def load():
-    print('load')
-    sb.load()
+@click.argument('backup_id')
+def load(backup_id):
+    print('loading backup: {bid}'.format(bid=backup_id))
+    sb.run_load(backup_id)
 
 
 main.add_command(archive)
