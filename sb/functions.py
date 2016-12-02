@@ -43,8 +43,32 @@ def archived_emacsconfig(sb_id):
     emacs_dir = remove_dot(EMACS_CONFIG)
     return backup_dir(sb_id) / emacs_dir
 
+
 ##############
 
+# TODO: break into small parts
+def show():
+    for backup_dir in PATH.glob('*'):
+        backup_id = backup_dir.name
+        bu_sm = archived_spacemacs(backup_id)
+        bu_em = archived_emacsconfig(backup_id)
+        # backup must be a directory
+        if not backup_dir.is_dir():
+            continue
+        # backup must contain spacemacs file
+        if not bu_sm.is_file():
+            continue
+        # backup must contain emacs.d dir
+        if not bu_em.is_dir():
+            continue
+        # backup_id must be formated as timestamp
+        try:
+            time = int(backup_id)
+        except ValueError:
+            continue
+
+        date = interpret_id(time)
+        print(backup_id, '--', date)
 
 def current_id():
     today = datetime.datetime.today()

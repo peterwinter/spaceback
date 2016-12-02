@@ -39,13 +39,15 @@ def archive():
 # TODO: get it working
 @click.command()
 def show():
-    print('show')
+    print('backups:')
+    sb.show()
 
 
 # TODO: get it working
 @click.command()
 def load():
     print('load')
+    sb.load()
 
 
 main.add_command(archive)
