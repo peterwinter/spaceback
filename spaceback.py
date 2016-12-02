@@ -4,36 +4,20 @@ __email__ = 'peterwinteriii@gmail.com'
 __status__ = 'prototype'
 
 # standard imports
-import os
-import pathlib
 import click
-import shutil
-import stat
-import datetime
+import pathlib
+import os
 
+# local imports
+import sb
 
 # Todo: make config file for globals
-HOME = pathlib.Path('/Users/peterwinter')
 DEFAULT_NAME = pathlib.Path('.spaceback')
-
 SPACEMACS_DOT = pathlib.Path('.spacemacs')
 EMACS_CONFIG = pathlib.Path('.emacs.d')
+
+HOME = pathlib.Path(os.getenv("HOME"))
 PATH = HOME / DEFAULT_NAME
-
-class SpaceParts(object):
-
-    def __init__(self, partname):
-        self.part = str(partname)
-        self.home = pathlib.Path(HOME)
-        self.spacedir = pathlib.Path(PATH)
-        self.arcive_path = self.home / self.part
-        self.active_path = self.spacedir / self.part
-
-class SpaceDot(SpaceParts):
-    pass
-
-class EmacsConfig(SpaceParts):
-    pass
 
 @click.group()
 def main():
@@ -41,24 +25,27 @@ def main():
     if not PATH.is_dir():
         PATH.mkdir()
 
-
 @click.command()
 def archive():
-    print('archive')
 
-    if not SPACEMACS_DOT.is_file():
-        print('dot spacemacs does not exist')
-        return
+    active_sm = sb.active_spacemacs()
+    active_emc = sb.active_emacsconfig()
 
-    if not EMACS_CONFIG.is_dir():
-        print('.emacs.d does not exist')
-        return
+    backup_id = sb.current_id()
+    print('archive --> {bid}'.format(bid=backup_id))
+    backup_dir = PATH / '{now}'.format(now=backup_id)
+    sb.ensure_dir_exists(backup_dir)
+    # print(backup_id)
+    # print(backup_dir, backup_dir.exists(), backup_dir.is_dir())
 
-    now = current_timestamp()
-    backup_dir = PATH / '{now}'.format(now=now)
+    bu_sm = sb.archived_spacemacs(backup_id)
+    bu_em = sb.archived_emacsconfig(backup_id)
+    # print(bu_sm)
+    # print(bu_em)
 
-    copy_file(SPACEMACS_DOT, backup_dir)
-    copy_dir(EMACS_CONFIG, backup_dir)
+    print('copying...', end=' ')
+    sb.copy_file(active_sm, bu_sm)
+    sb.copy_dir(active_emc, bu_em)
     print('done!')
 
 
@@ -77,63 +64,6 @@ def load():
 main.add_command(archive)
 main.add_command(show)
 main.add_command(load)
-
-###### permissions #####
-
-def ensure_dir_permissions(path):
-    path = pathlib.Path(path)
-    if not path.parent.exists():
-        ensure_dir_permissions(path=path.parent.absolute())
-
-    if not path.is_dir():
-        print('creating with permissions:')
-        path.mkdir()
-        try:
-            shutil.chown(str(path), group='lab')
-            os.chmod(str(path), stat.S_IRWXU | stat.S_IRWXG)
-        except PermissionError:
-            print(
-                "WARNING: It was not possible to change the permission to the following files: \n"
-                + path + "\n")
-        print('made outpath: {p}'.format(p=path))
-
-
-def change_file_permissions(file_path):
-    if not isinstance(file_path, pathlib.Path):
-        file_path = pathlib.Path(file_path)
-    if not file_path.is_file():
-        print('path does not exist')
-        return
-    try:
-        shutil.chown(str(file_path), group='lab')
-        os.chmod(str(file_path), stat.S_IRWXU | stat.S_IRWXG)
-    except:
-        print(
-            "WARNING: It was not possible to change the permission to the following files: \n"
-            + str(file_path))
-
-def copy_file(input_path, output_path):
-    ensure_dir_permissions(path=output_path.parent)
-    shutil.copy(str(input_path), str(output_path))
-    change_file_permissions(output_path)
-
-
-def copy_dir(input_path, output_path):
-    ensure_dir_permissions(path=output_path.parent)
-    shutil.copytree(str(input_path), str(output_path))
-
-
-def current_timestamp():
-    today = datetime.datetime.today()
-    current_timestamp = round(today.timestamp())
-    return current_timestamp
-
-def interpret_timestamp(ts):
-    now = datetime.datetime.fromtimestamp(ts)
-    return '{s}'.format(s=now)
-
-
-
 
 if __name__ == '__main__':
     main()
