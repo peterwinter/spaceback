@@ -12,30 +12,50 @@ PATH = HOME / DEFAULT_NAME
 
 ##############
 
+def create_spacedir():
+    if not PATH.is_dir():
+        PATH.mkdir()
+
+
 def active_spacemacs():
     return HOME / SPACEMACS_DOT
+
 
 def active_emacsconfig():
     return HOME / EMACS_CONFIG
 
-def archived_spacemacs(sb_id):
+
+def backup_dir(sb_id):
     sb_id = '{sid}'.format(sid=sb_id)
-    return PATH / sb_id / '{}'.format(SPACEMACS_DOT).strip('.')
+    return PATH / sb_id
+
+
+def remove_dot(filename):
+    return '{}'.format(filename).strip('.')
+
+
+def archived_spacemacs(sb_id):
+    space_file = remove_dot(SPACEMACS_DOT)
+    return backup_dir(sb_id) / space_file
+
 
 def archived_emacsconfig(sb_id):
-    sb_id = '{sid}'.format(sid=sb_id)
-    return PATH / sb_id / '{}'.format(EMACS_CONFIG).strip('.')
+    emacs_dir = remove_dot(EMACS_CONFIG)
+    return backup_dir(sb_id) / emacs_dir
 
 ##############
+
 
 def current_id():
     today = datetime.datetime.today()
     current_timestamp = round(today.timestamp())
     return current_timestamp
 
+
 def interpret_id(ts):
     date = datetime.datetime.fromtimestamp(ts)
     return '{d}'.format(d=date)
+
 
 def active_exists():
     spacemacs_dot = active_spacemacs()

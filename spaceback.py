@@ -1,42 +1,29 @@
 #!/usr/bin/env python
-__author__ = 'Peter B. Winter'
-__email__ = 'peterwinteriii@gmail.com'
-__status__ = 'prototype'
 
 # standard imports
 import click
-import pathlib
-import os
 
 # local imports
 import sb
 
-# Todo: make config file for globals
-DEFAULT_NAME = pathlib.Path('.spaceback')
-SPACEMACS_DOT = pathlib.Path('.spacemacs')
-EMACS_CONFIG = pathlib.Path('.emacs.d')
-
-HOME = pathlib.Path(os.getenv("HOME"))
-PATH = HOME / DEFAULT_NAME
+__author__ = 'Peter B. Winter'
+__email__ = 'peterwinteriii@gmail.com'
+__status__ = 'prototype'
 
 @click.group()
 def main():
+    """primary command line function, called with options"""
     # if ~/.spaceback does not exist make it
-    if not PATH.is_dir():
-        PATH.mkdir()
+    sb.create_spacedir()
 
 @click.command()
 def archive():
-
+    """saves active spacemacs configuration as new archive entry"""
     active_sm = sb.active_spacemacs()
     active_emc = sb.active_emacsconfig()
 
     backup_id = sb.current_id()
     print('archive --> {bid}'.format(bid=backup_id))
-    backup_dir = PATH / '{now}'.format(now=backup_id)
-    sb.ensure_dir_exists(backup_dir)
-    # print(backup_id)
-    # print(backup_dir, backup_dir.exists(), backup_dir.is_dir())
 
     bu_sm = sb.archived_spacemacs(backup_id)
     bu_em = sb.archived_emacsconfig(backup_id)
