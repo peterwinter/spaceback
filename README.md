@@ -79,3 +79,14 @@ or, if you didn't set up the alias
 python spaceback.py load <backup-id>
 ```
 
+## Team
+
+![Peter Winter](https://avatars2.githubusercontent.com/u/5788194?v=3&u=df9b095fb2aece119eb15269a7199cdb2c147d4c&s=140)
+
+---
+
+[Peter Winter](https://github.com/peterwinter)
+
+
+## License
+MIT © [Peter Winter](https://github.com/peterwinter)
